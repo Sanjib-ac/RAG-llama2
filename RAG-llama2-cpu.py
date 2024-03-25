@@ -6,8 +6,9 @@ pip install llama-index-llms-huggingface
 pip install llama_index
 pip install llama-index-embeddings-langchain
 pip install accelerate
-pip install -i https://pypi.org/simple/ bitsandbytes
-pip install transformers==4.30
+pip install sentence-transformers
+# pip install -i https://pypi.org/simple/ bitsandbytes
+# pip install transformers==4.30
 """
 
 from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, ServiceContext, PromptTemplate
@@ -28,7 +29,7 @@ print(query_wrapper_prompt)
 
 from huggingface_hub import login
 
-login(token="xxxxxxxxxxxxxxx")
+login(token="xxxxxxx")
 
 import torch
 
@@ -70,7 +71,8 @@ index = VectorStoreIndex.from_documents(documents, service_context=service_conte
 print(f'Index: {index}')
 query_engine = index.as_query_engine()
 print(f'Query:{query_engine}')
-
-response=query_engine.query("what is attention is all you need?")
-
-print(response)
+while True:
+    qry = str(input("Any query?"))
+    # response=query_engine.query("what is attention is all you need?")
+    response = query_engine.query(qry)
+    print(f'Response: {response}')
