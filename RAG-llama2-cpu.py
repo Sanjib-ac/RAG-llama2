@@ -17,7 +17,7 @@ from llama_index.core.prompts.prompts import SimpleInputPrompt
 import llama_index.core.settings as lis
 
 documents = SimpleDirectoryReader("./data").load_data()
-# print(documents)
+print(documents)
 
 system_prompt = """
 You are a Q&A assistant. Your goal is to answer questions as
@@ -29,7 +29,7 @@ print(query_wrapper_prompt)
 
 from huggingface_hub import login
 
-login(token="xxxxxxx")
+login(token="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")
 
 import torch
 
@@ -41,7 +41,8 @@ llm = HuggingFaceLLM(
     query_wrapper_prompt=query_wrapper_prompt,
     tokenizer_name="meta-llama/Llama-2-7b-chat-hf",
     model_name="meta-llama/Llama-2-7b-chat-hf",
-    device_map="auto",
+    device_map="cuda",
+    model_kwargs={"torch_dtype": torch.float16}
     # uncomment this if using CUDA to reduce memory usage
     # model_kwargs={"torch_dtype": torch.float16, "load_in_8bit": True}
 )  # , "load_in_8bit_fp32_cpu_offload": True
@@ -51,7 +52,9 @@ from llama_index.core import ServiceContext
 
 # from llama_index.embeddings import LangchainEmbedding
 
-embed_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2")
+embed_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2",
+                                    model_kwargs={'device': 'cuda'},
+                                    encode_kwargs={'device': 'cuda'})
 
 service_context = ServiceContext.from_defaults(
     chunk_size=512,
@@ -66,13 +69,15 @@ service_context = ServiceContext.from_defaults(
 # )
 
 print(f'Service Context: {service_context}')
-index = VectorStoreIndex.from_documents(documents, service_context=service_context)
+index = VectorStoreIndex.from_documents(documents, service_context=service_context,
+                                        show_progress=True,
+                                        model_kwargs={'device': 'cuda'})
 
-print(f'Index: {index}')
-query_engine = index.as_query_engine()
-print(f'Query:{query_engine}')
+# print(f'Index: {index}')
+query_engine = index.as_query_engine(device_map='CUDA')
+# print(f'Query:{query_engine}')
 while True:
-    qry = str(input("Any query?"))
+    qry = str(input("Any query from the database?"))
     # response=query_engine.query("what is attention is all you need?")
     response = query_engine.query(qry)
     print(f'Response: {response}')
