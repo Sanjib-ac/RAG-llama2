@@ -7,18 +7,42 @@ pip install llama_index
 pip install llama-index-embeddings-langchain
 pip install accelerate
 pip install sentence-transformers
+
+#for image
+pip install pdfminer.six
+pip install pillow-heif
+pip install opencv-contrib-python
+
+
 # pip install -i https://pypi.org/simple/ bitsandbytes
 # pip install transformers==4.30
 """
-
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, ServiceContext, PromptTemplate
+import time
+import torch
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader  # ServiceContext, PromptTemplate
 from llama_index.llms.huggingface import HuggingFaceLLM
 from llama_index.core.prompts.prompts import SimpleInputPrompt
-import llama_index.core.settings as lis
 
-documents = SimpleDirectoryReader("./data").load_data()
-print(documents)
+# import llama_index.core.settings as lis
 
+# from doctr.io import DocumentFile
+# from doctr.models import ocr_predictor
+
+from langchain_community.document_loaders.image import UnstructuredImageLoader
+torch.cuda.current_device()
+
+
+loader = UnstructuredImageLoader("./data/images/radio.jpg").load()
+print(loader)
+
+
+#
+# documents = SimpleDirectoryReader("./data/").load_data()
+# print(documents)
+# for i, j in enumerate(documents):
+#     print(f'{i}: {j}\n')
+#     time.sleep(1)
+'''
 system_prompt = """
 You are a Q&A assistant. Your goal is to answer questions as
 accurately as possible based on the instructions and context provided.
@@ -27,11 +51,9 @@ accurately as possible based on the instructions and context provided.
 query_wrapper_prompt = SimpleInputPrompt("<|USER|>{query_str}<|ASSISTANT|>")
 print(query_wrapper_prompt)
 
-from huggingface_hub import login
-
-login(token="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")
-
-import torch
+# from huggingface_hub import login
+#
+# login(token="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")
 
 llm = HuggingFaceLLM(
     context_window=2048,
@@ -54,7 +76,11 @@ from llama_index.core import ServiceContext
 
 embed_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-mpnet-base-v2",
                                     model_kwargs={'device': 'cuda'},
-                                    encode_kwargs={'device': 'cuda'})
+                                    encode_kwargs={'normalize_embeddings': False},
+                                    cache_folder='./data',
+                                    # multi_process=True,
+                                    show_progress=True,
+                                    )
 
 service_context = ServiceContext.from_defaults(
     chunk_size=512,
@@ -68,7 +94,7 @@ service_context = ServiceContext.from_defaults(
 #     embed_model=embed_model
 # )
 
-print(f'Service Context: {service_context}')
+# print(f'Service Context: {service_context}')
 index = VectorStoreIndex.from_documents(documents, service_context=service_context,
                                         show_progress=True,
                                         model_kwargs={'device': 'cuda'})
@@ -81,3 +107,5 @@ while True:
     # response=query_engine.query("what is attention is all you need?")
     response = query_engine.query(qry)
     print(f'Response: {response}')
+
+'''
