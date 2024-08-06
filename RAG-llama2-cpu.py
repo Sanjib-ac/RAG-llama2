@@ -29,7 +29,7 @@ print(query_wrapper_prompt)
 
 from huggingface_hub import login
 
-login(token="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")
+login(token="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")
 
 import torch
 
@@ -39,8 +39,9 @@ llm = HuggingFaceLLM(
     generate_kwargs={"temperature": 0.1},
     system_prompt=system_prompt,
     query_wrapper_prompt=query_wrapper_prompt,
-    tokenizer_name="meta-llama/Llama-2-7b-chat-hf",
-    model_name="meta-llama/Llama-2-7b-chat-hf",
+
+    model_name="mistralai/Mistral-7B-Instruct-v0.1",
+    tokenizer_name="mistralai/Mistral-7B-Instruct-v0.1",
     device_map="cuda",
     model_kwargs={"torch_dtype": torch.float16}
     # uncomment this if using CUDA to reduce memory usage
